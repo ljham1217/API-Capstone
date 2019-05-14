@@ -1,0 +1,43 @@
+html {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: burlywood;
+  font-size: 18px;
+}
+  
+main {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+}
+  
+main section {
+  background: lightgreen;
+  padding: 40px;
+  text-align: center;
+}
+
+button {
+  margin: 20px 0 0;
+  font-size: 18px;
+}
+
+.searchResults {
+  list-style: none;
+}
+
+input {
+  font-size: 18px;
+}
+
+form {
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
