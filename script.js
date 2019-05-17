@@ -19,17 +19,17 @@ function getResults(zipCode) {
         }
         throw new Error (response.statusText);
     })
-    .then(responseJson => makeIdArray(responseJson))
+    .then(idResponseJson => makeIdArray(idResponseJson))
     .catch(err => {
         $('#js-error-message').text(`Something went wrong: ${err.message}`);
     })
 }
 
-function makeIdArray(responseJson) {
-    console.log(responseJson);
+function makeIdArray(idResponseJson) {
+    console.log(idResponseJson);
     const idArray= [];    
-    $.each(responseJson.results, function (i, val) {
-        idArray.push(responseJson.results[i].id);
+    $.each(idResponseJson.results, function (i, val) {
+        idArray.push(idResponseJson.results[i].id);
     });
         console.log(idArray);
         getDetails(idArray);       
@@ -45,34 +45,34 @@ function makeIdArray(responseJson) {
 };*/
 
 function getDetails(idArray) {
-    for (let i=0; i < idArray.length; i++)
-    fetch('http://search.ams.usda.gov/farmersmarkets/v1/data.svc/mktDetail?id=' + idArray[i] )
-    .then(response => {
-    if (response.ok) {
-        return response.json();
-    }
-    throw new Error (response.statusText);
-    })
-    .then (responseJson => marketDetailsArray(responseJson))
+    const marketsArray = [];
+    for (let i=0; i < idArray.length; i++) {
+        fetch('http://search.ams.usda.gov/farmersmarkets/v1/data.svc/mktDetail?id=' + idArray[i])
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error (response.statusText);
+        })
+        //.then (detailResponseJson => marketDetailsArray(detailResponseJson))
+        .then (detailResponseJson => marketsArray.push(detailResponseJson))
+        .then (console.log(marketsArray))
 
-    .catch(err => {
-    $('#js-error-message').text(`Something went wrong: ${err.message}`);
-    });
+        .catch(err => {
+        $('#js-error-message').text(`Something went wrong: ${err.message}`);
+        });
+    }
 }
 
-function marketDetailsArray(responseJson, idArray) {
-    console.log(responseJson);
-    const market = [responseJson];
-    console.log(market);
-    $.forEach(responseJson).concat(responseJson);
-    const marketDetail = {
-        market: [responseJson],
-        name: [],
-        address: [],
-        googlelink: [],
-        products: [],
-        schedule: [],
-    }
+function marketDetailsArray(detailResponseJson) {
+    console.log(detailResponseJson);
+    const market = [];
+    $.each(detailResponseJson.marketdetails, function (i, val) {
+        market.push(detailResponseJson.marketdetails);
+    });
+
+    //$.each(detailResponseJson).push(detailResponseJson);
+
 }
 
 /*function displayResults(results) {
