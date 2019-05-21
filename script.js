@@ -5,9 +5,11 @@ function watchForm() {
     $('form').submit(event => {
         event.preventDefault();
         const zipCode= $('#js-zipCode').val();
-        console.log(zipCode);
+            /*Promise.all(getResults(zipCode), getDetails());
+                promises.then(function(results) {
+                    console.log(results);
+                } );*/
             getResults(zipCode);
-        //.then(date => console.log(data))
     })
 }
 
@@ -25,6 +27,7 @@ function getResults(zipCode) {
     })
 }
 
+
 function makeIdArray(idResponseJson) {
     console.log(idResponseJson);
     const idArray= [];    
@@ -32,61 +35,55 @@ function makeIdArray(idResponseJson) {
         idArray.push(idResponseJson.results[i].id);
     });
         console.log(idArray);
-        getDetails(idArray);       
+        //displayResults(idResponseJson);//passing the original Array as it contains the market name
+        getDetails(idArray);  
+        displayResults(idResponseJson); 
 }
 
-/*function iterateResults(responseJson) {  
-    let marketIds = [responseJson];
-    let requests = marketIds.map(id => fetch)
-    const marketDetailsArray = [];
-        $.each(marketdetails, function(i, val){
-            marketDetailsArray.push(val.marketdetails);
-        });    
-};*/
+const fetchData = function() {
+    return new Promise(function (resolve, reject) {
+        resolve();
+    });
+}
 
 function getDetails(idArray) {
-    const marketsArray = [];
-    for (let i=0; i < idArray.length; i++) {
-        fetch('http://search.ams.usda.gov/farmersmarkets/v1/data.svc/mktDetail?id=' + idArray[i])
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error (response.statusText);
-        })
-        //.then (detailResponseJson => marketDetailsArray(detailResponseJson))
-        .then (detailResponseJson => marketsArray.push(detailResponseJson))
-        .then (console.log(marketsArray))
-
-        .catch(err => {
-        $('#js-error-message').text(`Something went wrong: ${err.message}`);
-        });
-    }
+    const marketsArray = []; 
+        for (let i=0; i < idArray.length; i++) {    
+            fetch('http://search.ams.usda.gov/farmersmarkets/v1/data.svc/mktDetail?id=' + idArray[i])
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error (response.statusText);
+            })
+            .then(detailResponseJson => marketsArray.push(detailResponseJson))
+            .catch(err => {
+            $('#js-error-message').text(`Something went wrong: ${err.message}`);
+            })          
+            
+        }
+    console.log(marketsArray);
 }
 
-function marketDetailsArray(detailResponseJson) {
-    console.log(detailResponseJson);
-    const market = [];
-    $.each(detailResponseJson.marketdetails, function (i, val) {
-        market.push(detailResponseJson.marketdetails);
-    });
-
-    //$.each(detailResponseJson).push(detailResponseJson);
-
-}
-
-/*function displayResults(results) {
+function displayResults(idResponseJson) {
+    console.log(idResponseJson);
+    let counter= 0;
     $('.searchResults').empty();
-  
-    for(let i=0; i < responseJson.results.length; i++){
-      $('.searchResults').append(
-        `<div class="cards">
-        <h1>${responseJson.results[i].marketname}</h1></div`
-      )};
+    for(let i=0; i < idResponseJson.results.length; i++){
+                $('.searchResults').append(
+                    `<div class="cards" id="${counter}">
+                    <h1>${idResponseJson.results[i].marketname}</h1>                
+                    </div>`
+                );
+    }
       $('#js-results').removeClass('hidden');
-      getDetails(marketIdArray);
 }
 
+function displayDetails(marketsArray) {
+    for(let i=0; i < marketsArray.length; i++){
+        $('cards').find('${i}').text("${marketsArray[i].marketdetails.Address}") }
+    console.log('can I log the paragraph?')
+}
 
 /*$('.searchResults').empty();
     
