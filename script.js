@@ -1,17 +1,42 @@
 'use strict'
 //watch for zipCode submission
 
+const GM_API_KEY = 'AIzaSyCKApVZv6tYGic3lfJ-dVWtpM0zHtu-QMw';
+let marketsArray = []; 
+
 function watchForm() {
     $('form').submit(event => {
         event.preventDefault();
         const zipCode= $('#js-zipCode').val();
-            /*Promise.all(getResults(zipCode), getDetails());
-                promises.then(function(results) {
-                    console.log(results);
-                } );*/
             getResults(zipCode);
+            getGeo(zipCode);
     })
 }
+
+////////////// Geolocation Maps /////////////////////////////
+function getGeo(zipCode){
+    const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?key=${GM_API_KEY}&components=postal_code:${zipCode}`
+    console.log(geoUrl);
+    fetch(geoUrl)
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error (response.statusText);
+    })
+    .then(responseJson => geoLocation(responseJson))
+}
+
+function geoLocation(responseJson) {
+    console.log('all geo info')
+    console.log(responseJson);
+    console.log('lat: ' + responseJson.results[0].geometry.location.lat);
+    console.log('long: ' + responseJson.results[0].geometry.location.lng);
+    let lat = $('responseJson.results[0].geometry.location.lat');
+    console.log(lat);
+}
+
+//////////////////// Farmers Markets Api //////////////////////////////////////
 
 function getResults(zipCode) {
     fetch('http://search.ams.usda.gov/farmersmarkets/v1/data.svc/zipSearch?zip=' + zipCode)
@@ -30,24 +55,17 @@ function getResults(zipCode) {
 
 function makeIdArray(idResponseJson) {
     console.log(idResponseJson);
-    const idArray= [];    
-    $.each(idResponseJson.results, function (i, val) {
-        idArray.push(idResponseJson.results[i].id);
-    });
-        console.log(idArray);
-        //displayResults(idResponseJson);//passing the original Array as it contains the market name
-        getDetails(idArray);  
-        displayResults(idResponseJson); 
+    let idArray= [];  
+    let origArray = idResponseJson;  
+        $.each(idResponseJson.results, function (i, val) {
+            idArray.push(idResponseJson.results[i].id);
+        });
+    getDetails(idArray, idResponseJson);  
 }
 
-const fetchData = function() {
-    return new Promise(function (resolve, reject) {
-        resolve();
-    });
-}
+console.log(marketsArray);
 
-function getDetails(idArray) {
-    const marketsArray = []; 
+function getDetails(idArray, idResponseJson) {
         for (let i=0; i < idArray.length; i++) {    
             fetch('http://search.ams.usda.gov/farmersmarkets/v1/data.svc/mktDetail?id=' + idArray[i])
             .then(response => {
@@ -60,30 +78,35 @@ function getDetails(idArray) {
             .catch(err => {
             $('#js-error-message').text(`Something went wrong: ${err.message}`);
             })          
-            
         }
+    console.log('fetching done');
     console.log(marketsArray);
+
+    displayResults(idResponseJson, marketsArray);
 }
 
-function displayResults(idResponseJson) {
-    console.log(idResponseJson);
-    let counter= 0;
+
+
+function displayResults(idResponseJson, marketsArray) {
+    console.log(marketsArray);
+    console.log(marketsArray[0].marketdetails.Address);
     $('.searchResults').empty();
-    for(let i=0; i < idResponseJson.results.length; i++){
+    for(let i=0; i < marketsArray.length; i++){
                 $('.searchResults').append(
-                    `<div class="cards" id="${counter}">
-                    <h1>${idResponseJson.results[i].marketname}</h1>                
+                    `<div class="cards">
+                    
+                    <p>${marketsArray[i].marketdetails.Address}</p>               
                     </div>`
                 );
     }
       $('#js-results').removeClass('hidden');
 }
 
-function displayDetails(marketsArray) {
+/*function displayDetails(marketsArray) {
     for(let i=0; i < marketsArray.length; i++){
         $('cards').find('${i}').text("${marketsArray[i].marketdetails.Address}") }
     console.log('can I log the paragraph?')
-}
+}*/
 
 /*$('.searchResults').empty();
     
@@ -99,7 +122,6 @@ function displayDetails(marketsArray) {
         detailresults.push(val.marketdetails);
         console.log(marketDetail);
     })
-
 for (var key in detailresults) {
     console.log(key);
     var results = detailresults[key];
