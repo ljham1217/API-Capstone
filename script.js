@@ -32,9 +32,20 @@ function geoLocation(responseJson) {
     console.log(responseJson);
     console.log('lat: ' + responseJson.results[0].geometry.location.lat);
     console.log('long: ' + responseJson.results[0].geometry.location.lng);
-    let lat = $('responseJson.results[0].geometry.location.lat');
+    let lat = responseJson.results[0].geometry.location.lat;
+    let lng = responseJson.results[0].geometry.location.lng;
     console.log(lat);
+    console.log(lng);
 }
+
+window.initMap = function(){
+    // Resonsive google map
+     google.maps.event.addDomListener(window, "resize", function() {
+        var center = map.getCenter();
+        google.maps.event.trigger(map, "resize");
+        map.setCenter(center); 
+ });
+
 
 //////////////////// Farmers Markets Api //////////////////////////////////////
 
@@ -60,12 +71,13 @@ function makeIdArray(idResponseJson) {
         $.each(idResponseJson.results, function (i, val) {
             idArray.push(idResponseJson.results[i].id);
         });
-    getDetails(idArray, idResponseJson);  
+    getDetails(idArray);  
+    displayResults(origArray);
 }
 
 console.log(marketsArray);
 
-function getDetails(idArray, idResponseJson) {
+function getDetails(idArray) {
         for (let i=0; i < idArray.length; i++) {    
             fetch('http://search.ams.usda.gov/farmersmarkets/v1/data.svc/mktDetail?id=' + idArray[i])
             .then(response => {
@@ -79,23 +91,16 @@ function getDetails(idArray, idResponseJson) {
             $('#js-error-message').text(`Something went wrong: ${err.message}`);
             })          
         }
-    console.log('fetching done');
-    console.log(marketsArray);
-
-    displayResults(idResponseJson, marketsArray);
 }
 
 
-
-function displayResults(idResponseJson, marketsArray) {
-    console.log(marketsArray);
-    console.log(marketsArray[0].marketdetails.Address);
+function displayResults(origArray) {
+    console.log(origArray.results[0].marketname);
     $('.searchResults').empty();
-    for(let i=0; i < marketsArray.length; i++){
+    for(let i=0; i < origArray.results.length; i++){
                 $('.searchResults').append(
-                    `<div class="cards">
-                    
-                    <p>${marketsArray[i].marketdetails.Address}</p>               
+                    `<div class="cards">  
+                    <h1>${origArray.results[i].marketname}</h1>               
                     </div>`
                 );
     }
@@ -131,4 +136,4 @@ for (var key in detailresults) {
 $(function(){
     console.log('App loaded! Waiting for submit!');
     watchForm();
-});
+})
